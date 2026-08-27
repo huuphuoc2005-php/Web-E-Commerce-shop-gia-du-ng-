@@ -33,10 +33,11 @@ export default async function Home(props: HomeProps) {
   } catch (e) {
     console.error("Lỗi kết nối DB (Categories), dùng fallback:", e);
     categories = [
-      { id: "cat-1", name: "Công tắc & Ổ cắm" },
-      { id: "cat-2", name: "Bóng đèn LED & Chiếu sáng" },
-      { id: "cat-3", name: "Aptomat & Thiết bị bảo vệ" },
-      { id: "cat-4", name: "Thiết bị Nước & Sen vòi" },
+      { id: "cat-1", name: "Thiết bị điện" },
+      { id: "cat-2", name: "Vật tư nước" },
+      { id: "cat-3", name: "Smart Home & IoT" },
+      { id: "cat-4", name: "Đèn chiếu sáng & Trang trí" },
+      { id: "cat-5", name: "Dụng cụ & Đồ nghề" },
     ];
   }
 
@@ -98,8 +99,70 @@ export default async function Home(props: HomeProps) {
       orderBy: orderByCondition,
     });
   } catch (e) {
-    console.error("Lỗi kết nối DB (Products), dùng fallback sản phẩm mẫu:", e);
-    products = [
+    console.error("Lỗi kết nối DB (Products), dùng fallback sản phẩm mẫu phong phú:", e);
+    const allFallbackProducts = [
+      // Dụng cụ & Đồ nghề
+      {
+        id: "cmryd2wq5005d1y88x095twpm",
+        name: "Hộp đồ nghề sửa chữa nhựa 2 tầng 17 inch",
+        price: 180000,
+        originalPrice: 220000,
+        image: "/images/banner-ocam.png",
+        modelNumber: "DN-17",
+        description: "Hộp đựng đồ nghề sửa chữa nhựa PP chịu va đập 17 inch có khay chia dụng cụ tiện lợi.",
+        category: { name: "Dụng cụ & Đồ nghề" },
+        categoryId: "cat-5",
+        stock: 50,
+      },
+      {
+        id: "cm-tool-2",
+        name: "Bộ mũi khoan đa năng khoét tường gạch kính 5 món",
+        price: 70000,
+        originalPrice: 95000,
+        image: "/images/LED-buildtru-nhomnhua20W.jpg",
+        modelNumber: "MK-5M",
+        description: "Bộ 5 mũi khoan đa năng chân lục giác khoan gạch men, kính, tường gạch siêu bén.",
+        category: { name: "Dụng cụ & Đồ nghề" },
+        categoryId: "cat-5",
+        stock: 100,
+      },
+      {
+        id: "cm-tool-3",
+        name: "Kìm bấm chết 10 inch thép hợp kim cao cấp",
+        price: 130000,
+        originalPrice: 160000,
+        image: "/images/congtacdoi2chieusino.png",
+        modelNumber: "KC-10I",
+        description: "Kìm chết 10 inch ngàm cong thép CR-V tôi luyện mạ niken chống gỉ cực khỏe.",
+        category: { name: "Dụng cụ & Đồ nghề" },
+        categoryId: "cat-5",
+        stock: 40,
+      },
+      {
+        id: "cm-tool-4",
+        name: "Súng bắn keo nến 60W công tắc an toàn",
+        price: 70000,
+        originalPrice: 90000,
+        image: "/images/banner-premium-plumbing-3.png",
+        modelNumber: "SK-60W",
+        description: "Súng bắn keo nến 60W nóng nhanh có rơ le tự ngắt bảo vệ an toàn.",
+        category: { name: "Dụng cụ & Đồ nghề" },
+        categoryId: "cat-5",
+        stock: 75,
+      },
+      {
+        id: "cm-tool-5",
+        name: "Bộ lục giác hoa thị 9 chi tiết thép bọc màu",
+        price: 330000,
+        originalPrice: 390000,
+        image: "/images/congtacdoi2chieusino.png",
+        modelNumber: "LG-9HT",
+        description: "Bộ lục giác bông hoa thị 9 cây thép S2 chịu lực xoắn cao mạ màu phân biệt.",
+        category: { name: "Dụng cụ & Đồ nghề" },
+        categoryId: "cat-5",
+        stock: 30,
+      },
+      // Thiết bị điện
       {
         id: "cm-01",
         name: "Aptomat Chống giật RCCB Schneider 2P 40A 30mA",
@@ -108,7 +171,8 @@ export default async function Home(props: HomeProps) {
         image: "/images/congtacdoi2chieusino.png",
         modelNumber: "EZ9R33240",
         description: "Aptomat chống rò điện Schneider 40A 30mA chính hãng, ngắt điện trong 0.03s.",
-        category: { name: "Aptomat & Thiết bị bảo vệ" },
+        category: { name: "Thiết bị điện" },
+        categoryId: "cat-1",
         stock: 50,
       },
       {
@@ -119,9 +183,11 @@ export default async function Home(props: HomeProps) {
         image: "/images/banner-premium-plumbing-3.png",
         modelNumber: "MCB-BBN2322",
         description: "Cầu dao tự động ngắt khi quá tải ngắn mạch Panasonic 32A 2P.",
-        category: { name: "Aptomat & Thiết bị bảo vệ" },
+        category: { name: "Thiết bị điện" },
+        categoryId: "cat-1",
         stock: 100,
       },
+      // Đèn chiếu sáng
       {
         id: "cm-03",
         name: "Bóng đèn LED Bulb Trụ Nhôm 20W Rạng Đông",
@@ -130,7 +196,8 @@ export default async function Home(props: HomeProps) {
         image: "/images/LED-buildtru-nhomnhua20W.jpg",
         modelNumber: "LED-A80/20W",
         description: "Bóng đèn LED 20W siêu sáng, tiết kiệm 85% điện năng, chip Samsung.",
-        category: { name: "Bóng đèn LED & Chiếu sáng" },
+        category: { name: "Đèn chiếu sáng & Trang trí" },
+        categoryId: "cat-4",
         stock: 200,
       },
       {
@@ -141,9 +208,11 @@ export default async function Home(props: HomeProps) {
         image: "/images/LED-buildtru-nhomnhua20W.jpg",
         modelNumber: "AT10-9W3M",
         description: "Đèn âm trần 9W đổi 3 màu ánh sáng (Trắng - Vàng - Trung tính).",
-        category: { name: "Bóng đèn LED & Chiếu sáng" },
+        category: { name: "Đèn chiếu sáng & Trang trí" },
+        categoryId: "cat-4",
         stock: 150,
       },
+      // Smart Home
       {
         id: "cm-05",
         name: "Công tắc cảm ứng Tuya Smart Wifi 3 Nút Kính đen",
@@ -152,7 +221,8 @@ export default async function Home(props: HomeProps) {
         image: "/images/congtacdoi2chieusino.png",
         modelNumber: "Tuya-SW3-BLK",
         description: "Công tắc cảm ứng thông minh Tuya Wifi bật tắt từ xa qua app điện thoại.",
-        category: { name: "Công tắc & Ổ cắm" },
+        category: { name: "Smart Home & IoT" },
+        categoryId: "cat-3",
         stock: 80,
       },
       {
@@ -163,9 +233,11 @@ export default async function Home(props: HomeProps) {
         image: "/images/banner-ocam.png",
         modelNumber: "Tuya-WUS-1P",
         description: "Ổ cắm thông minh hẹn giờ tự động ngắt sạc qua Wifi 16A.",
-        category: { name: "Công tắc & Ổ cắm" },
+        category: { name: "Smart Home & IoT" },
+        categoryId: "cat-3",
         stock: 90,
       },
+      // Vật tư nước
       {
         id: "cm-07",
         name: "Vòi sen tắm tăng áp Mặt inox Cụm bát sen 3 chế độ",
@@ -174,21 +246,16 @@ export default async function Home(props: HomeProps) {
         image: "/images/banner-premium-plumbing-3.png",
         modelNumber: "SEN-TA-03",
         description: "Bát sen tắm inox 304 tăng áp lực nước 300% cho nguồn nước yếu.",
-        category: { name: "Thiết bị Nước & Sen vòi" },
+        category: { name: "Vật tư nước" },
+        categoryId: "cat-2",
         stock: 120,
-      },
-      {
-        id: "cm-08",
-        name: "Sino S18 Series Công tắc 1 nút vuông Trắng",
-        price: 25000,
-        originalPrice: 32000,
-        image: "/images/congtacdoi2chieusino.png",
-        modelNumber: "S181",
-        description: "Công tắc đơn Sino S181 nhựa PC chống cháy cách điện chính hãng.",
-        category: { name: "Công tắc & Ổ cắm" },
-        stock: 300,
       }
     ];
+
+    // Lọc theo danh mục nếu được chọn
+    products = categoryId
+      ? allFallbackProducts.filter((p) => p.categoryId === categoryId)
+      : allFallbackProducts;
   }
 
   return (
