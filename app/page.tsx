@@ -27,7 +27,18 @@ export default async function Home(props: HomeProps) {
   const priceRange = searchParams.priceRange || "all";
 
   // 3. Lấy danh sách danh mục để làm bộ lọc
-  const categories = await db.category.findMany();
+  let categories: any[] = [];
+  try {
+    categories = await db.category.findMany();
+  } catch (e) {
+    console.error("Lỗi kết nối DB (Categories), dùng fallback:", e);
+    categories = [
+      { id: "cat-1", name: "Công tắc & Ổ cắm" },
+      { id: "cat-2", name: "Bóng đèn LED & Chiếu sáng" },
+      { id: "cat-3", name: "Aptomat & Thiết bị bảo vệ" },
+      { id: "cat-4", name: "Thiết bị Nước & Sen vòi" },
+    ];
+  }
 
   // Xác định cách sắp xếp
   let orderByCondition: Record<string, "asc" | "desc"> = { createdAt: "desc" };
@@ -63,27 +74,122 @@ export default async function Home(props: HomeProps) {
     return queryString ? `/?${queryString}#products` : "/#products";
   };
 
-  // 4. Lấy sản phẩm (Có điều kiện lọc)
-  const products = await db.product.findMany({
-    where: {
-      AND: [
-        query
-          ? {
-              OR: [
-                { name: { contains: query } },
-                { modelNumber: { contains: query } },
-                { aiLabels: { contains: query } },
-                { description: { contains: query } },
-              ],
-            }
-          : {},
-        categoryId ? { categoryId } : {},
-        priceFilter,
-      ],
-    },
-    include: { category: true },
-    orderBy: orderByCondition,
-  });
+  // 4. Lấy sản phẩm (Có điều kiện lọc & try-catch dự phòng)
+  let products: any[] = [];
+  try {
+    products = await db.product.findMany({
+      where: {
+        AND: [
+          query
+            ? {
+                OR: [
+                  { name: { contains: query } },
+                  { modelNumber: { contains: query } },
+                  { aiLabels: { contains: query } },
+                  { description: { contains: query } },
+                ],
+              }
+            : {},
+          categoryId ? { categoryId } : {},
+          priceFilter,
+        ],
+      },
+      include: { category: true },
+      orderBy: orderByCondition,
+    });
+  } catch (e) {
+    console.error("Lỗi kết nối DB (Products), dùng fallback sản phẩm mẫu:", e);
+    products = [
+      {
+        id: "cm-01",
+        name: "Aptomat Chống giật RCCB Schneider 2P 40A 30mA",
+        price: 490000,
+        originalPrice: 580000,
+        image: "/images/congtacdoi2chieusino.png",
+        modelNumber: "EZ9R33240",
+        description: "Aptomat chống rò điện Schneider 40A 30mA chính hãng, ngắt điện trong 0.03s.",
+        category: { name: "Aptomat & Thiết bị bảo vệ" },
+        stock: 50,
+      },
+      {
+        id: "cm-02",
+        name: "Aptomat Cầu dao tự động Panasonic 2P 32A",
+        price: 135000,
+        originalPrice: 160000,
+        image: "/images/banner-premium-plumbing-3.png",
+        modelNumber: "MCB-BBN2322",
+        description: "Cầu dao tự động ngắt khi quá tải ngắn mạch Panasonic 32A 2P.",
+        category: { name: "Aptomat & Thiết bị bảo vệ" },
+        stock: 100,
+      },
+      {
+        id: "cm-03",
+        name: "Bóng đèn LED Bulb Trụ Nhôm 20W Rạng Đông",
+        price: 45000,
+        originalPrice: 60000,
+        image: "/images/LED-buildtru-nhomnhua20W.jpg",
+        modelNumber: "LED-A80/20W",
+        description: "Bóng đèn LED 20W siêu sáng, tiết kiệm 85% điện năng, chip Samsung.",
+        category: { name: "Bóng đèn LED & Chiếu sáng" },
+        stock: 200,
+      },
+      {
+        id: "cm-04",
+        name: "Đèn LED Âm trần Downlight 9W 3 Màu Rạng Đông",
+        price: 85000,
+        originalPrice: 110000,
+        image: "/images/LED-buildtru-nhomnhua20W.jpg",
+        modelNumber: "AT10-9W3M",
+        description: "Đèn âm trần 9W đổi 3 màu ánh sáng (Trắng - Vàng - Trung tính).",
+        category: { name: "Bóng đèn LED & Chiếu sáng" },
+        stock: 150,
+      },
+      {
+        id: "cm-05",
+        name: "Công tắc cảm ứng Tuya Smart Wifi 3 Nút Kính đen",
+        price: 320000,
+        originalPrice: 390000,
+        image: "/images/congtacdoi2chieusino.png",
+        modelNumber: "Tuya-SW3-BLK",
+        description: "Công tắc cảm ứng thông minh Tuya Wifi bật tắt từ xa qua app điện thoại.",
+        category: { name: "Công tắc & Ổ cắm" },
+        stock: 80,
+      },
+      {
+        id: "cm-06",
+        name: "Tuya Smart Wifi Ổ cắm âm tường đơn US Trắng",
+        price: 210000,
+        originalPrice: 260000,
+        image: "/images/banner-ocam.png",
+        modelNumber: "Tuya-WUS-1P",
+        description: "Ổ cắm thông minh hẹn giờ tự động ngắt sạc qua Wifi 16A.",
+        category: { name: "Công tắc & Ổ cắm" },
+        stock: 90,
+      },
+      {
+        id: "cm-07",
+        name: "Vòi sen tắm tăng áp Mặt inox Cụm bát sen 3 chế độ",
+        price: 95000,
+        originalPrice: 130000,
+        image: "/images/banner-premium-plumbing-3.png",
+        modelNumber: "SEN-TA-03",
+        description: "Bát sen tắm inox 304 tăng áp lực nước 300% cho nguồn nước yếu.",
+        category: { name: "Thiết bị Nước & Sen vòi" },
+        stock: 120,
+      },
+      {
+        id: "cm-08",
+        name: "Sino S18 Series Công tắc 1 nút vuông Trắng",
+        price: 25000,
+        originalPrice: 32000,
+        image: "/images/congtacdoi2chieusino.png",
+        modelNumber: "S181",
+        description: "Công tắc đơn Sino S181 nhựa PC chống cháy cách điện chính hãng.",
+        category: { name: "Công tắc & Ổ cắm" },
+        stock: 300,
+      }
+    ];
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
