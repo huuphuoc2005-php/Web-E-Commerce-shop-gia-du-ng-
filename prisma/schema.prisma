@@ -1,0 +1,123 @@
+// 1. Cấu hình kết nối
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 2. Bảng Người dùng (User)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Lưu mật khẩu mã hóa
+  name      String?
+  avatar    String?  // Link ảnh đại diện
+  phone     String?  // Số điện thoại mặc định
+  address   String?  // Địa chỉ nhận hàng mặc định
+  role      String   @default("USER") // USER, ADMIN
+  createdAt DateTime @default(now())
+
+  orders    Order[]  // Quan hệ: 1 User có nhiều đơn hàng
+}
+
+// 3. Bảng Đơn hàng (Order)
+model Order {
+  id             String      @id @default(uuid())
+  customerName   String
+  phone          String
+  address        String
+  totalAmount    Float
+  discountAmount Float       @default(0)
+  voucherCode    String?
+  status         String      @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DONE, CANCELLED
+  createdAt      DateTime    @default(now())
+  
+  // Liên kết với User (nếu khách đã đăng nhập)
+  userId         String?
+  user           User?       @relation(fields: [userId], references: [id])
+
+  // Danh sách các món trong đơn
+  items          OrderItem[]
+}
+
+// 4. Bảng Chi tiết đơn hàng (OrderItem)
+model OrderItem {
+  id        String  @id @default(cuid())
+  
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  
+  quantity  Int     // Số lượng mua
+  price     Float   // Giá tại thời điểm mua
+}
+
+// 5. Bảng Danh mục sản phẩm (Category)
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  products Product[]
+}
+
+// 6. Bảng Sản phẩm (Product)
+model Product {
+  id          String   @id @default(cuid())
+  name        String   // Tên đầy đủ
+  modelNumber String?  // Mã Model
+  price       Int
+  description String?
+  stock       Int      @default(0)
+  aiLabels    String?  
+  image       String   // Link ảnh thật
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  orderItems  OrderItem[]
+  reviews     Review[]
+}
+
+// 7. Bảng Đánh giá & Nhận xét sản phẩm (Review)
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      // 1 đến 5 sao
+  comment     String?
+  authorName  String
+  authorPhone String?
+  createdAt   DateTime @default(now())
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// 8. Bảng Mã giảm giá (Voucher)
+model Voucher {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Int?      // Ví dụ: 10% -> 10
+  discountAmount  Int?      // Ví dụ: 50.000đ -> 50000
+  minOrderAmount  Int       @default(0)
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  expiresAt       DateTime?
+}
+
+// 9. Bảng Cấu hình Cửa hàng (StoreSetting)
+model StoreSetting {
+  id                String   @id @default("default")
+  storeName         String   @default("Phú Lâm Store")
+  phone             String   @default("0869001296")
+  address           String   @default("103, QL37 TT Vĩnh Bảo, tp Hải Phòng")
+  email             String   @default("phulamphuocphuong4@gmail.com")
+  shippingFee       Int      @default(0)
+  freeShipThreshold Int      @default(200000)
+  bannerAnnouncement String? @default("Chào mừng bạn đến với Phú Lâm Store - Cam kết chính hãng 100%")
+  maintenanceMode   Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+}

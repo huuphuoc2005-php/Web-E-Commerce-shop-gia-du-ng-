@@ -1,65 +1,229 @@
-import Image from "next/image";
+import { db } from "@/lib/db";
+import Link from "next/link";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import ProductCard from "./components/ProductCard";
+import ElectricalCalculator from "./components/ElectricalCalculator";
+import { ChevronRight, Truck, ShieldCheck, RefreshCw } from "lucide-react";
+import HeroCarousel from "./components/HeroCarousel";
 
-export default function Home() {
+
+// 1. Định nghĩa kiểu dữ liệu cho tham số tìm kiếm (URL)
+interface HomeProps {
+  searchParams: Promise<{
+    query?: string;
+    categoryId?: string;
+    sort?: string;
+    priceRange?: string;
+  }>;
+}
+
+export default async function Home(props: HomeProps) {
+  // 2. Lấy tham số từ URL
+  const searchParams = await props.searchParams;
+  const query = searchParams.query || "";
+  const categoryId = searchParams.categoryId || "";
+  const sort = searchParams.sort || "newest";
+  const priceRange = searchParams.priceRange || "all";
+
+  // 3. Lấy danh sách danh mục để làm bộ lọc
+  const categories = await db.category.findMany();
+
+  // Xác định cách sắp xếp
+  let orderByCondition: Record<string, "asc" | "desc"> = { createdAt: "desc" };
+  if (sort === "price-asc") {
+    orderByCondition = { price: "asc" };
+  } else if (sort === "price-desc") {
+    orderByCondition = { price: "desc" };
+  }
+
+  // Điều kiện lọc giá
+  let priceFilter = {};
+  if (priceRange === "under-50k") {
+    priceFilter = { price: { lte: 50000 } };
+  } else if (priceRange === "50k-200k") {
+    priceFilter = { price: { gte: 50000, lte: 200000 } };
+  } else if (priceRange === "over-200k") {
+    priceFilter = { price: { gte: 200000 } };
+  }
+
+  // Helper tạo URL với tham số search
+  const createFilterUrl = (newParams: { categoryId?: string; sort?: string; priceRange?: string }) => {
+    const params = new URLSearchParams();
+    const targetCategory = newParams.categoryId !== undefined ? newParams.categoryId : categoryId;
+    const targetSort = newParams.sort !== undefined ? newParams.sort : sort;
+    const targetPrice = newParams.priceRange !== undefined ? newParams.priceRange : priceRange;
+
+    if (query) params.set("query", query);
+    if (targetCategory) params.set("categoryId", targetCategory);
+    if (targetSort && targetSort !== "newest") params.set("sort", targetSort);
+    if (targetPrice && targetPrice !== "all") params.set("priceRange", targetPrice);
+
+    const queryString = params.toString();
+    return queryString ? `/?${queryString}#products` : "/#products";
+  };
+
+  // 4. Lấy sản phẩm (Có điều kiện lọc)
+  const products = await db.product.findMany({
+    where: {
+      AND: [
+        query
+          ? {
+              OR: [
+                { name: { contains: query } },
+                { modelNumber: { contains: query } },
+                { aiLabels: { contains: query } },
+                { description: { contains: query } },
+              ],
+            }
+          : {},
+        categoryId ? { categoryId } : {},
+        priceFilter,
+      ],
+    },
+    include: { category: true },
+    orderBy: orderByCondition,
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-gray-50 font-sans">
+      <Header />
+
+      <main>
+        {!query && !categoryId && (
+          <HeroCarousel categories={categories.map((cat) => ({ id: cat.id, name: cat.name }))} />
+        )}
+        <section className="bg-white border-b">
+          <div className="max-w-screen-2xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50">
+               <div className="bg-blue-100 p-3 rounded-full text-blue-600"><Truck size={24} /></div>
+               <div><p className="font-bold text-gray-800">Giao hàng</p><p className="text-xs text-gray-500">Nội thành - Ngoại tỉnh</p></div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-lg bg-green-50">
+               <div className="bg-green-100 p-3 rounded-full text-green-600"><ShieldCheck size={24} /></div>
+               <div><p className="font-bold text-gray-800">Chính hãng</p><p className="text-xs text-gray-500">Bồi thường nếu hàng giả</p></div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-lg bg-orange-50">
+               <div className="bg-orange-100 p-3 rounded-full text-orange-600"><RefreshCw size={24} /></div>
+               <div><p className="font-bold text-gray-800">Đổi trả miễn phí</p><p className="text-xs text-gray-500">Trong vòng 7 ngày</p></div>
+            </div>
+          </div>
+        </section>
+
+        {/* CATEGORY & PRODUCTS */}
+        <div id="products" className="max-w-screen-2xl mx-auto px-4 py-12">
+          
+          {/* Bộ lọc Danh mục */}
+          <div className="flex gap-3 overflow-x-auto pb-6 scrollbar-hide">
+            <Link
+              href={createFilterUrl({ categoryId: "" })}
+              className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition border ${
+                !categoryId 
+                ? "bg-gray-900 text-white border-gray-900" 
+                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              }`}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+              Tất cả sản phẩm
+            </Link>
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={createFilterUrl({ categoryId: cat.id })}
+                className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition border ${
+                  categoryId === cat.id 
+                  ? "bg-blue-600 text-white border-blue-600" 
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                }`}
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Tiêu đề & Nút Sắp xếp + Bộ lọc Khoảng giá */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              {query ? `Kết quả tìm kiếm: "${query}"` : (categoryId ? "Sản phẩm theo danh mục" : "Gợi ý hôm nay")}
+              <span className="text-sm font-normal text-gray-500">({products.length} sản phẩm)</span>
+            </h2>
+
+            <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm font-medium text-gray-600">
+              {/* Lọc Giá */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                <span className="text-gray-400 whitespace-nowrap">Giá:</span>
+                {[
+                  { key: "all", label: "Tất cả" },
+                  { key: "under-50k", label: "< 50k" },
+                  { key: "50k-200k", label: "50k - 200k" },
+                  { key: "over-200k", label: "> 200k" },
+                ].map((p) => (
+                  <Link
+                    key={p.key}
+                    href={createFilterUrl({ priceRange: p.key })}
+                    className={`px-3 py-1.5 rounded-lg border transition whitespace-nowrap ${
+                      priceRange === p.key
+                        ? "bg-gray-900 text-white border-gray-900 font-bold"
+                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    {p.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Sắp xếp */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 border-l border-gray-200 pl-3">
+                <span className="text-gray-400 whitespace-nowrap">Sắp xếp:</span>
+                <Link
+                  href={createFilterUrl({ sort: "newest" })}
+                  className={`px-3 py-1.5 rounded-lg border transition whitespace-nowrap ${
+                    sort === "newest"
+                      ? "bg-blue-50 text-blue-600 border-blue-200 font-bold"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Mới nhất
+                </Link>
+                <Link
+                  href={createFilterUrl({ sort: "price-asc" })}
+                  className={`px-3 py-1.5 rounded-lg border transition whitespace-nowrap ${
+                    sort === "price-asc"
+                      ? "bg-blue-50 text-blue-600 border-blue-200 font-bold"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Giá ↑
+                </Link>
+                <Link
+                  href={createFilterUrl({ sort: "price-desc" })}
+                  className={`px-3 py-1.5 rounded-lg border transition whitespace-nowrap ${
+                    sort === "price-desc"
+                      ? "bg-blue-50 text-blue-600 border-blue-200 font-bold"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Giá ↓
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid Sản phẩm */}
+          {products.length === 0 ? (
+             <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+               <p className="text-gray-400 text-lg">Không tìm thấy sản phẩm phù hợp.</p>
+               <Link href="/" className="text-blue-600 underline mt-2 block">Xóa bộ lọc</Link>
+             </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+              {products.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          )}
         </div>
       </main>
+      <Footer/>
     </div>
   );
 }
