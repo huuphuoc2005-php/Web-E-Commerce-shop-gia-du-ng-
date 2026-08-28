@@ -283,8 +283,6 @@ export async function createOrder(data: unknown, cartItems: unknown) {
     };
   }
 }
-}
-
 
 /**
  * HÀM CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (Dùng cho trang Admin)

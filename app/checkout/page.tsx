@@ -45,6 +45,9 @@
       }
     };
 
+    // Payment Method state
+    const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer">("cod");
+
     // Xử lý khi bấm nút Đặt Hàng
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -62,7 +65,7 @@
         const order = await createOrder(customerInfo, items);
 
         clearCart();
-        toast.success("Đặt hàng thành công!");
+        toast.success(paymentMethod === "transfer" ? "Đã nhận xác nhận chuyển khoản! Đặt hàng thành công." : "Đặt hàng thành công!");
         router.push(`/checkout/success?orderId=${order.id}`);
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Lỗi: Không thể tạo đơn hàng.");
@@ -82,6 +85,9 @@
       )
     }
 
+    // URL VietQR tạo động theo số tiền đơn hàng
+    const vietQrUrl = `https://img.vietqr.io/image/MB-2305012005-compact2.png?amount=${finalTotalAmount}&addInfo=PHULAM%20STORE%20THANHTOAN&accountName=PHAM%20HUU%20PHUOC`;
+
     return (
       <div className="min-h-screen bg-gray-50 font-sans">
         <Header />
@@ -94,33 +100,127 @@
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             
             {/* CỘT TRÁI: FORM NHẬP THÔNG TIN */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <h2 className="font-bold text-gray-800 mb-6 flex items-center gap-2 pb-2 border-b">
-                  <MapPin className="text-blue-600" size={20}/> Thông tin giao hàng
-              </h2>
-              
-              <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1">Họ và tên</label>
-                  <div className="relative">
-                      <User className="absolute left-3 top-3 text-gray-400" size={18}/>
-                      <input name="name" required placeholder="Ví dụ: Phạm Hữu Phước" className="w-full pl-10 text-black pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+              <div>
+                <h2 className="font-bold text-gray-800 mb-4 flex items-center gap-2 pb-2 border-b">
+                    <MapPin className="text-blue-600" size={20}/> 1. Thông tin giao hàng
+                </h2>
+                
+                <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">Họ và tên</label>
+                    <div className="relative">
+                        <User className="absolute left-3 top-3 text-gray-400" size={18}/>
+                        <input name="name" required placeholder="Ví dụ: Phạm Hữu Phước" className="w-full pl-10 text-black pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                    </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">Số điện thoại</label>
+                    <div className="relative">
+                        <Phone className="absolute left-3 top-3 text-gray-400" size={18}/>
+                        <input name="phone" required placeholder="Ví dụ: 0924..." className="w-full pl-10 pr-4 py-2.5 text-black border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">Địa chỉ nhận hàng</label>
+                    <textarea name="address" required placeholder="Số nhà, đường, xã/phường..." rows={3} className="w-full p-3 text-black border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                  </div>
+                </form>
+              </div>
+
+              {/* CHỌN PHƯƠNG THỨC THANH TOÁN */}
+              <div className="pt-2">
+                <h2 className="font-bold text-gray-800 mb-4 flex items-center gap-2 pb-2 border-b">
+                    <Ticket className="text-blue-600" size={20}/> 2. Phương thức thanh toán
+                </h2>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cod")}
+                    className={`p-3.5 rounded-xl border text-left flex flex-col gap-1 transition ${
+                      paymentMethod === "cod"
+                        ? "border-blue-600 bg-blue-50/50 text-blue-900 ring-2 ring-blue-500/20"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    <span className="font-bold text-xs flex items-center gap-1.5">
+                      💵 Thanh toán COD
+                    </span>
+                    <span className="text-[11px] text-gray-500">Tiền mặt khi nhận hàng</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("transfer")}
+                    className={`p-3.5 rounded-xl border text-left flex flex-col gap-1 transition ${
+                      paymentMethod === "transfer"
+                        ? "border-blue-600 bg-blue-50/50 text-blue-900 ring-2 ring-blue-500/20"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    <span className="font-bold text-xs flex items-center gap-1.5">
+                      💳 Chuyển khoản QR
+                    </span>
+                    <span className="text-[11px] text-gray-500">Mã VietQR MB Bank</span>
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1">Số điện thoại</label>
-                  <div className="relative">
-                      <Phone className="absolute left-3 top-3 text-gray-400" size={18}/>
-                      <input name="phone" required placeholder="Ví dụ: 0924..." className="w-full pl-10 pr-4 py-2.5 text-black border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
-                  </div>
-                </div>
+                {/* KHUNG MÃ QR VIETQR KHI CHỌN CHUYỂN KHOẢN */}
+                {paymentMethod === "transfer" && (
+                  <div className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white p-5 rounded-2xl shadow-md space-y-4 animate-in fade-in duration-300">
+                    <div className="flex items-center justify-between border-b border-white/20 pb-3">
+                      <div>
+                        <p className="text-xs text-blue-200 uppercase font-bold">Thanh toán qua Ngân hàng</p>
+                        <p className="text-base font-black text-yellow-400">MB BANK (Ngân hàng Quân Đội)</p>
+                      </div>
+                      <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded font-bold">VietQR</span>
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1">Địa chỉ nhận hàng</label>
-                  <textarea name="address" required placeholder="Số nhà, đường, xã/phường..." rows={3} className="w-full p-3 text-black border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
-                </div>
-              </form>
+                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-white/10 p-3 rounded-xl border border-white/10">
+                      <div className="bg-white p-2 rounded-xl shrink-0 shadow-lg">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={vietQrUrl}
+                          alt="VietQR MB Bank PHAM HUU PHUOC"
+                          className="w-36 h-36 object-contain"
+                        />
+                      </div>
+
+                      <div className="space-y-2 text-xs w-full">
+                        <div>
+                          <p className="text-blue-200 text-[11px]">Tên chủ tài khoản:</p>
+                          <p className="font-bold text-sm text-yellow-300">PHAM HUU PHUOC</p>
+                        </div>
+                        <div>
+                          <p className="text-blue-200 text-[11px]">Số tài khoản MB Bank:</p>
+                          <div className="flex items-center justify-between bg-black/30 px-2.5 py-1.5 rounded border border-white/20">
+                            <span className="font-mono font-bold text-sm text-white">2305012005</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText("2305012005");
+                                toast.success("Đã sao chép Số tài khoản MB Bank!");
+                              }}
+                              className="text-[10px] bg-yellow-400 text-blue-950 font-extrabold px-2 py-0.5 rounded hover:bg-yellow-300"
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-blue-200 text-[11px]">Số tiền cần quét:</p>
+                          <p className="font-bold text-base text-emerald-400">
+                            {new Intl.NumberFormat("vi-VN").format(finalTotalAmount)}₫
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* CỘT PHẢI: KIỂM TRA ĐƠN HÀNG */}
@@ -202,10 +302,10 @@
                   disabled={loading}
                   className="w-full mt-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-bold hover:shadow-lg hover:scale-[1.01] transition disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                  {loading ? "Đang xử lý..." : "XÁC NHẬN ĐẶT HÀNG (COD)"}
+                  {loading ? "Đang xử lý..." : paymentMethod === "transfer" ? "ĐÃ CHUYỂN KHOẢN - XÁC NHẬN ĐƠN" : "XÁC NHẬN ĐẶT HÀNG (COD)"}
               </button>
               <p className="text-[10px] text-center text-gray-400 mt-3">
-                Thanh toán tiền mặt khi nhận hàng. Kiểm tra hàng thoải mái.
+                {paymentMethod === "transfer" ? "Quét mã QR VietQR MB Bank ở cột bên trái để hoàn tất." : "Thanh toán tiền mặt khi nhận hàng. Kiểm tra hàng thoải mái."}
               </p>
             </div>
 
