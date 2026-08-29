@@ -23,9 +23,16 @@ export default function Footer({ settings }: FooterProps) {
           {/* CỘT 1: THƯƠNG HIỆU */}
           <div className="flex flex-col gap-3">
             <div>
-              <h3 className="text-white text-xl font-bold tracking-tighter uppercase">
-                {storeName}
-              </h3>
+              {(() => {
+                const nameParts = storeName.trim().split(" ");
+                const lastPart = nameParts.length > 1 ? nameParts.pop() : "";
+                const firstPart = nameParts.join(" ");
+                return (
+                  <h3 className="text-white text-xl font-bold tracking-tighter uppercase">
+                    {firstPart} {lastPart ? <span className="text-orange-500">{lastPart}</span> : null}
+                  </h3>
+                );
+              })()}
               <p className="text-gray-400 text-xs mt-1 leading-relaxed">
                 Thiết bị điện dân dụng chính hãng - Uy tín tạo niềm tin.
               </p>

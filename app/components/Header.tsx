@@ -63,10 +63,17 @@ export default function Header({ settings }: HeaderProps) {
       <div className="py-4 px-4 bg-white">
         <div className="max-w-7xl mx-auto flex items-center gap-4 md:gap-8">
           
-          {/* Logo */}
-          <Link href="/" className="text-3xl md:text-4xl font-black text-blue-700 flex-shrink-0 tracking-tighter uppercase">
-            {storeName}
-          </Link>
+          {/* Logo 2 Màu Đẹp Mắt */}
+          {(() => {
+            const nameParts = storeName.trim().split(" ");
+            const lastPart = nameParts.length > 1 ? nameParts.pop() : "";
+            const firstPart = nameParts.join(" ");
+            return (
+              <Link href="/" className="text-3xl md:text-4xl font-black text-blue-700 flex-shrink-0 tracking-tighter uppercase">
+                {firstPart} {lastPart ? <span className="text-orange-500">{lastPart}</span> : null}
+              </Link>
+            );
+          })()}
 
           {/* Thanh tìm kiếm (Desktop) */}
           <form action="/" method="GET" className="flex-1 hidden md:flex relative group">
