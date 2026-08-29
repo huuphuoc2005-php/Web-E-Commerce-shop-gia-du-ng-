@@ -138,9 +138,24 @@ export default async function TrackingPage(props: TrackingPageProps) {
     },
   ];
 
-  const activeOrders = (result && result.success && result.orders.length > 0)
-    ? result.orders
-    : defaultRecentOrders;
+  // Lấy dữ liệu từ DB hoặc mẫu
+  let candidateOrders: any[] = [];
+  if (result && result.success && result.orders.length > 0) {
+    candidateOrders = result.orders;
+  } else {
+    candidateOrders = defaultRecentOrders;
+  }
+
+  // Lọc thông minh theo searchQuery (nếu người dùng gõ SĐT / Mã đơn / Tên)
+  const cleanQuery = searchQuery.trim().toLowerCase();
+  const activeOrders = cleanQuery
+    ? candidateOrders.filter((order) => {
+        const matchId = order.id.toLowerCase().includes(cleanQuery);
+        const matchPhone = order.phone ? order.phone.toLowerCase().includes(cleanQuery) : false;
+        const matchName = order.customerName ? order.customerName.toLowerCase().includes(cleanQuery) : false;
+        return matchId || matchPhone || matchName;
+      })
+    : candidateOrders;
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col justify-between">
@@ -213,7 +228,17 @@ export default async function TrackingPage(props: TrackingPageProps) {
               {searchQuery ? `Kết quả tìm kiếm cho "${searchQuery}"` : "📋 Đơn hàng gần đây trên hệ thống"}
             </p>
 
-                  {activeOrders.map((order: any) => {
+            {activeOrders.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-sm max-w-md mx-auto">
+                <XCircle size={40} className="mx-auto text-rose-500 mb-2" />
+                <p className="font-bold text-gray-800 text-sm mb-1">Không tìm thấy đơn hàng</p>
+                <p className="text-xs text-gray-500 mb-4">Không có đơn hàng nào khớp với từ khóa "{searchQuery}"</p>
+                <Link href="/tracking" className="inline-block text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition">
+                  Xem tất cả đơn hàng gần đây
+                </Link>
+              </div>
+            ) : (
+              activeOrders.map((order: any) => {
                     const statusInfo = statusConfig[order.status] || statusConfig.PENDING;
                     const currentStep = statusInfo.step;
                     const isCancelled = order.status === "CANCELLED";
@@ -354,7 +379,8 @@ export default async function TrackingPage(props: TrackingPageProps) {
                         </div>
                       </div>
                     );
-                  })}
+                  })
+            )}
           </div>
         </main>
       </div>
