@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
 
   const handleQuickFillAdmin = () => {
     setEmail("admin@phulam.com");
-    setPassword("123456");
+    setPassword("admin123");
     toast.info("Đã nhập mẫu tài khoản Admin: admin@phulam.com");
   };
 
