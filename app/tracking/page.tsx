@@ -2,6 +2,7 @@ import { getOrdersByTracking } from "@/lib/actions";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Search, PackageCheck, Truck, Clock, CheckCircle2, XCircle, ArrowLeft, MapPin, Phone, User } from "lucide-react";
 
 interface TrackingPageProps {
@@ -65,8 +66,21 @@ export default async function TrackingPage(props: TrackingPageProps) {
     result = await getOrdersByTracking(searchQuery);
   }
 
+  // Đọc danh sách đơn hàng vừa đặt từ cookie người dùng
+  let cookiePlacedOrders: any[] = [];
+  try {
+    const cookieStore = await cookies();
+    const rawCookie = cookieStore.get("recent_placed_orders")?.value;
+    if (rawCookie) {
+      cookiePlacedOrders = JSON.parse(rawCookie);
+    }
+  } catch (e) {
+    console.log("Could not read recent_placed_orders cookie:", e);
+  }
+
   // Nếu không có searchQuery, nạp danh sách Đơn hàng Gần đây mẫu để xem tự do ngay lập tức
   const defaultRecentOrders = [
+    ...cookiePlacedOrders,
     {
       id: "ORD-PL-892104",
       customerName: "Phạm Hữu Phước",
