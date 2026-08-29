@@ -110,31 +110,77 @@ export default async function AdminOrdersPage() {
                     {new Intl.NumberFormat("vi-VN").format(order.totalAmount)}₫
                   </td>
 
-                  {/* Cột 5: NÚT BẤM CHUYỂN TRẠNG THÁI (Cập nhật mới) */}
+                  {/* Cột 5: NÚT BẤM CHUYỂN TRẠNG THÁI (Giao diện chuẩn Video Demo) */}
                   <td className="p-4 align-top">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 min-w-[180px]">
+                      {/* Badge Trạng thái Hiện tại */}
+                      <div className="mb-1">
+                        <span className="text-[10px] uppercase font-extrabold text-gray-400 block mb-1">Trạng thái hiện tại:</span>
+                        {order.status === "PENDING" && (
+                          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 font-extrabold text-xs px-3 py-1 rounded-full border border-amber-200 shadow-xs">
+                            ⏳ CHỜ XÁC NHẬN
+                          </span>
+                        )}
+                        {order.status === "CONFIRMED" && (
+                          <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 font-extrabold text-xs px-3 py-1 rounded-full border border-blue-200 shadow-xs">
+                            ✅ ĐÃ XÁC NHẬN
+                          </span>
+                        )}
+                        {order.status === "SHIPPED" && (
+                          <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full border border-purple-200 shadow-xs">
+                            🚚 ĐANG GIAO HÀNG
+                          </span>
+                        )}
+                        {order.status === "DONE" && (
+                          <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-1 rounded-full border border-emerald-200 shadow-xs">
+                            🎉 GIAO THÀNH CÔNG
+                          </span>
+                        )}
+                        {order.status === "CANCELLED" && (
+                          <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-800 font-extrabold text-xs px-3 py-1 rounded-full border border-rose-200 shadow-xs">
+                            ❌ ĐÃ HỦY ĐƠN
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Nút bấm chuyển sang Bước tiếp theo */}
                       <form action={updateOrderStatus}>
                         <input type="hidden" name="orderId" value={order.id} />
 
-                        {nextStatusMap[order.status as OrderStatus] ? (
+                        {order.status === "PENDING" && (
                           <>
-                            <input
-                              type="hidden"
-                              name="newStatus"
-                              value={nextStatusMap[order.status as OrderStatus]}
-                            />
+                            <input type="hidden" name="newStatus" value="CONFIRMED" />
                             <button
                               type="submit"
-                              className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200 hover:bg-green-200 transition flex items-center gap-1"
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1"
                             >
-                              {statusLabelMap[order.status as OrderStatus]} -&gt;{" "}
-                              {statusLabelMap[nextStatusMap[order.status as OrderStatus] as OrderStatus]}
+                              🚀 Duyệt & Xác nhận đơn
                             </button>
                           </>
-                        ) : (
-                          <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold border border-gray-300 inline-block">
-                            {statusLabelMap[order.status as OrderStatus]}
-                          </span>
+                        )}
+
+                        {order.status === "CONFIRMED" && (
+                          <>
+                            <input type="hidden" name="newStatus" value="SHIPPED" />
+                            <button
+                              type="submit"
+                              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1"
+                            >
+                              🚚 Chuyển sang Đang giao
+                            </button>
+                          </>
+                        )}
+
+                        {order.status === "SHIPPED" && (
+                          <>
+                            <input type="hidden" name="newStatus" value="DONE" />
+                            <button
+                              type="submit"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1"
+                            >
+                              🎉 Xác nhận Giao thành công
+                            </button>
+                          </>
                         )}
                       </form>
 
@@ -144,9 +190,9 @@ export default async function AdminOrdersPage() {
                           <input type="hidden" name="newStatus" value="CANCELLED" />
                           <button
                             type="submit"
-                            className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200 hover:bg-red-100 transition"
+                            className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-[11px] py-1 px-2 rounded-lg border border-rose-200 transition"
                           >
-                            Hủy đơn
+                            ❌ Hủy đơn hàng
                           </button>
                         </form>
                       )}
