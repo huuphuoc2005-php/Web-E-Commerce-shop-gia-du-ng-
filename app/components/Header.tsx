@@ -6,7 +6,17 @@ import { useCart } from "@/lib/cart";
 import { useEffect, useState } from "react";
 import { useTypewriter } from "../hooks/useTypewrite";
 
-export default function Header() {
+interface HeaderProps {
+  settings?: {
+    storeName?: string;
+    phone?: string;
+    address?: string;
+    email?: string;
+    bannerAnnouncement?: string | null;
+  } | null;
+}
+
+export default function Header({ settings }: HeaderProps) {
   const items = useCart((state) => state.items);
   const [mounted, setMounted] = useState(false);
   const placeholderText = useTypewriter({
@@ -22,15 +32,25 @@ export default function Header() {
   useEffect(() => { setMounted(true); }, []);
 
   const totalQuantity = mounted ? items.reduce((total, item) => total + item.quantity, 0) : 0;
+  const storePhone = settings?.phone || "0869001296";
+  const storeAddress = settings?.address || "103, QL37 TT Vĩnh Bảo, tp Hải Phòng";
+  const storeName = settings?.storeName || "PHÚ LÂM STORE";
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
+      {/* Thông báo Banner nếu Admin cài đặt */}
+      {settings?.bannerAnnouncement && (
+        <div className="bg-amber-400 text-amber-950 font-bold text-xs py-1.5 px-4 text-center tracking-wide flex items-center justify-center gap-2">
+          <span>📢 {settings.bannerAnnouncement}</span>
+        </div>
+      )}
+
       {/* Tầng 1: Top Bar - Thông tin liên hệ */}
       <div className="bg-blue-900 text-white text-xs py-2 px-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-4">
-            <span className="flex items-center gap-1"><Phone size={14} /> Hotline: 0869001296</span>
-            <span className="hidden md:flex items-center gap-1"><MapPin size={14} /> 103, QL37 TT Vĩnh Bảo, tp Hải Phòng</span>
+            <span className="flex items-center gap-1"><Phone size={14} /> Hotline: {storePhone}</span>
+            <span className="hidden md:flex items-center gap-1"><MapPin size={14} /> {storeAddress}</span>
           </div>
           <div className="flex gap-4 items-center">
             <Link href="/tracking" className="hover:text-yellow-400 transition font-medium text-blue-200">Tra cứu đơn hàng</Link>
@@ -44,8 +64,8 @@ export default function Header() {
         <div className="max-w-7xl mx-auto flex items-center gap-4 md:gap-8">
           
           {/* Logo */}
-          <Link href="/" className="text-4xl font-black text-blue-700 flex-shrink-0 tracking-tighter">
-            PHÚ LÂM<span className="text-orange-500"> STORE</span>
+          <Link href="/" className="text-3xl md:text-4xl font-black text-blue-700 flex-shrink-0 tracking-tighter uppercase">
+            {storeName}
           </Link>
 
           {/* Thanh tìm kiếm (Desktop) */}

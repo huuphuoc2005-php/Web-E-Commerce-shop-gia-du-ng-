@@ -1,61 +1,75 @@
-export default function Footer() {
-    return (
-      <footer className="bg-gray-900 text-gray-300 py-8 border-t-4 border-blue-600 font-sans text-sm">
-        <div className="max-w-7xl mx-auto px-4">
+interface FooterProps {
+  settings?: {
+    storeName?: string;
+    phone?: string;
+    address?: string;
+    email?: string;
+  } | null;
+}
+
+export default function Footer({ settings }: FooterProps) {
+  const storePhone = settings?.phone || "0869.001.296";
+  const storeAddress = settings?.address || "Số 103, QL37, Thị trấn Vĩnh Bảo, Huyện Vĩnh Bảo, TP. Hải Phòng";
+  const storeEmail = settings?.email || "phulamphuocphuong4@gmail.com";
+  const storeName = settings?.storeName || "PHÚ LÂM STORE";
+
+  return (
+    <footer className="bg-gray-900 text-gray-300 py-8 border-t-4 border-blue-600 font-sans text-sm">
+      <div className="max-w-7xl mx-auto px-4">
+        
+        {/* CHIA LƯỚI 4 CỘT ĐỂ DÀN NGANG */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
-          {/* CHIA LƯỚI 4 CỘT ĐỂ DÀN NGANG */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* CỘT 1: THƯƠNG HIỆU */}
+          <div className="flex flex-col gap-3">
+            <div>
+              <h3 className="text-white text-xl font-bold tracking-tighter uppercase">
+                {storeName}
+              </h3>
+              <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+                Thiết bị điện dân dụng chính hãng - Uy tín tạo niềm tin.
+              </p>
+            </div>
             
-            {/* CỘT 1: THƯƠNG HIỆU */}
-            <div className="flex flex-col gap-3">
-              <div>
-                <h3 className="text-white text-xl font-bold tracking-tighter uppercase">
-                  PHÚ LÂM <span className="text-blue-500">STORE</span>
-                </h3>
-                <p className="text-gray-400 text-xs mt-1 leading-relaxed">
-                  Thiết bị điện dân dụng chính hãng - Uy tín tạo niềm tin.
-                </p>
-              </div>
-              
-              <div className="flex gap-2">
-                <a href="#" className="w-8 h-8 bg-white/10 hover:bg-blue-600 rounded flex items-center justify-center transition text-white">f</a>
-                <a href="#" className="w-8 h-8 bg-white/10 hover:bg-red-600 rounded flex items-center justify-center transition text-white">G</a>
-                <a href="#" className="w-8 h-8 bg-white/10 hover:bg-black rounded flex items-center justify-center transition text-white">X</a>
-              </div>
+            <div className="flex gap-2">
+              <a href="#" className="w-8 h-8 bg-white/10 hover:bg-blue-600 rounded flex items-center justify-center transition text-white">f</a>
+              <a href="#" className="w-8 h-8 bg-white/10 hover:bg-red-600 rounded flex items-center justify-center transition text-white">G</a>
+              <a href="#" className="w-8 h-8 bg-white/10 hover:bg-black rounded flex items-center justify-center transition text-white">X</a>
             </div>
-  
-            {/* CỘT 2: LIÊN KẾT NHANH */}
-            <div>
-              <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-wider border-b border-gray-700 pb-2 inline-block">
-                Hỗ trợ khách hàng
-              </h4>
-              <ul className="space-y-2 text-xs text-gray-400">
-                <li><a href="#" className="hover:text-blue-400 transition">• Hướng dẫn mua hàng</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">• Chính sách giao hàng</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">• Chính sách bảo hành</a></li>
-                <li><a href="/tracking" className="hover:text-blue-400 transition">• Tra cứu đơn hàng</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">• Bảo mật thông tin</a></li>
-              </ul>
-            </div>
-  
-            {/* CỘT 3: LIÊN HỆ */}
-            <div>
-              <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-wider border-b border-gray-700 pb-2 inline-block">
-                Thông tin 
-              </h4>
-              <ul className="space-y-3 text-xs text-gray-400">
-                <li className="flex gap-2 items-start">
-                  <span className="shrink-0">📍</span> 
-                  <span>Số 103, QL37, Thị trấn Vĩnh Bảo,<br/>Huyện Vĩnh Bảo, TP. Hải Phòng</span>
-                </li>
-                <li className="flex gap-2 items-center">
-                  <span className="shrink-0">📞</span> 
-                  <span className="text-white text-sm">0869.001.296</span>
-                </li>
-                <li className="flex gap-2 items-center">
-                  <span className="shrink-0">✉️</span> 
-                  <span>phulamphuocphuong4@gmail.com</span>
-                </li>
+          </div>
+
+          {/* CỘT 2: LIÊN KẾT NHANH */}
+          <div>
+            <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-wider border-b border-gray-700 pb-2 inline-block">
+              Hỗ trợ khách hàng
+            </h4>
+            <ul className="space-y-2 text-xs text-gray-400">
+              <li><a href="#" className="hover:text-blue-400 transition">• Hướng dẫn mua hàng</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition">• Chính sách giao hàng</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition">• Chính sách bảo hành</a></li>
+              <li><a href="/tracking" className="hover:text-blue-400 transition">• Tra cứu đơn hàng</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition">• Bảo mật thông tin</a></li>
+            </ul>
+          </div>
+
+          {/* CỘT 3: LIÊN HỆ */}
+          <div>
+            <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-wider border-b border-gray-700 pb-2 inline-block">
+              Thông tin 
+            </h4>
+            <ul className="space-y-3 text-xs text-gray-400">
+              <li className="flex gap-2 items-start">
+                <span className="shrink-0">📍</span> 
+                <span>{storeAddress}</span>
+              </li>
+              <li className="flex gap-2 items-center">
+                <span className="shrink-0">📞</span> 
+                <span className="text-white text-sm">{storePhone}</span>
+              </li>
+              <li className="flex gap-2 items-center">
+                <span className="shrink-0">✉️</span> 
+                <span>{storeEmail}</span>
+              </li>
                 <li className="flex gap-2 items-center">
                   <span className="shrink-0">⏰</span> 
                   <span>Open 7:00 - 20:00 (hàng ngày)</span>

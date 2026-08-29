@@ -6,6 +6,7 @@ import ProductCard from "./components/ProductCard";
 import ElectricalCalculator from "./components/ElectricalCalculator";
 import { ChevronRight, Truck, ShieldCheck, RefreshCw } from "lucide-react";
 import HeroCarousel from "./components/HeroCarousel";
+import { getStoreSettings } from "@/lib/actions";
 
 
 // 1. Định nghĩa kiểu dữ liệu cho tham số tìm kiếm (URL)
@@ -25,6 +26,14 @@ export default async function Home(props: HomeProps) {
   const categoryId = searchParams.categoryId || "";
   const sort = searchParams.sort || "newest";
   const priceRange = searchParams.priceRange || "all";
+
+  // Lấy cài đặt hệ thống thực tế từ Database
+  let storeSettings = null;
+  try {
+    storeSettings = await getStoreSettings();
+  } catch (e) {
+    console.log("Could not load storeSettings on page:", e);
+  }
 
   // 3. Lấy danh sách danh mục để làm bộ lọc
   let categories: any[] = [];
@@ -260,7 +269,7 @@ export default async function Home(props: HomeProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      <Header />
+      <Header settings={storeSettings} />
 
       <main>
         {!query && !categoryId && (
@@ -396,7 +405,7 @@ export default async function Home(props: HomeProps) {
           )}
         </div>
       </main>
-      <Footer/>
+      <Footer settings={storeSettings} />
     </div>
   );
 }
