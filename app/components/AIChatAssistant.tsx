@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, X, Send, Sparkles, ShoppingBag, CheckCircle, Image as ImageIcon, Camera, Trash2 } from "lucide-react";
+import { Bot, X, Send, Sparkles, ShoppingBag, CheckCircle, Image as ImageIcon, Camera, Trash2, Maximize2, Minimize2 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -63,6 +63,7 @@ const mockKnowledge: Record<string, { text: string; products: ProductRecommendat
 
 export default function AIChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [input, setInput] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageMime, setSelectedImageMime] = useState<string>("image/jpeg");
@@ -189,29 +190,50 @@ export default function AIChatAssistant() {
         </button>
       )}
 
-      {/* CỬA SỔ WIDGET CHAT AI */}
+      {/* CỬA SỔ WIDGET CHAT AI (HỖ TRỢ PHÓNG TO / THU NHỎ LẠI THEO Ý NGƯỜI DÙNG) */}
       {isOpen && (
-        <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-[360px] sm:w-[420px] h-[580px] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
-          {/* HEADER CHAT */}
-          <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white p-4 flex items-center justify-between">
+        <div
+          className={`bg-white border border-gray-200 flex flex-col overflow-hidden transition-all duration-300 ${
+            isMaximized
+              ? "fixed inset-4 sm:inset-10 z-50 rounded-3xl shadow-2xl w-auto h-auto max-w-5xl mx-auto"
+              : "rounded-3xl shadow-2xl w-[360px] sm:w-[440px] h-[600px]"
+          }`}
+        >
+          {/* HEADER CHAT CÓ NÚT PHÓNG TO / THU NHỎ / ĐÓNG */}
+          <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white p-4 flex items-center justify-between shadow-md shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 text-yellow-300">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 text-yellow-300 shadow-inner">
                 <Sparkles size={22} />
               </div>
               <div>
                 <h3 className="font-bold text-sm flex items-center gap-1.5">
-                  Trợ lý Tư vấn Phú Lâm <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-normal">Online 24/7</span>
+                  Trợ lý Tư vấn Phú Lâm <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-normal shadow-xs">Online 24/7</span>
                 </h3>
                 <p className="text-[11px] text-blue-200">Đọc ảnh sơ đồ & Tư vấn kỹ thuật 24/7</p>
               </div>
             </div>
 
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
-            >
-              <X size={20} />
-            </button>
+            {/* Cụm nút điều khiển: Phóng to / Thu nhỏ / Đóng */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsMaximized(!isMaximized)}
+                className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition"
+                title={isMaximized ? "Thu nhỏ cửa sổ" : "Phóng to toàn màn hình"}
+              >
+                {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsMaximized(false);
+                }}
+                className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition"
+                title="Đóng cửa sổ chat"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
           {/* KHUNG NỘI DUNG CHAT */}
